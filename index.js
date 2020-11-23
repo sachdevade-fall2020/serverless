@@ -1,16 +1,30 @@
-const _ = require('lodash');
 const aws = require('aws-sdk');
+const dynamodb = new aws.DynamoDB();
 
 const env = process.env;
 
 exports.handler = function(event, context) {
-    console.log("Event");
-    console.log(event);
-
-    console.log("Context");
-    console.log(context);
-
-    console.log("Environment Variables");
-    console.log(_.get(env, 'sender'));
-    console.log(_.get(env, 'table_name'));
+    console.log(event.Records[0].Sns.Message);
+    
+    var snsMessage = JSON.parse(event.Records[0].Sns.Message);
+    
+    const tableName = env.table_name;
+    const sender = env.sender;
+    
+    var getParams = {
+        TableName: tableName,
+        FilterExpression: '(email = :email)',
+        ExpressionAttributeValues: {
+          ':email': {S: snsMessage.email},
+        }
+    };
+    
+    const getItem = dynamodb.scan(getParams).promise();
+    
+    getItem.then(data => {
+        console.log(data);
+    }).catch(err => {
+        console.log(err);
+        context.done(err, "Get Item Fail");
+    });
 }
