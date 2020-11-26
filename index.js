@@ -29,19 +29,20 @@ exports.handler = function(event, context) {
     
     getItem.then(data => {
         if(data.Count == 0){
-            
+            console.log("Sending Email Notification");
             const sendEmail = ses.sendEmail({
                 Destination: { ToAddresses: [snsMessage.question_user_email] },
                 Message: {
-                    Body: { Text: { Data: snsMessage.answer_url } },
-                    Subject: { Data: 'Update Notification' }
+                    Body: { Html: { Data: snsMessage.email_body } },
+                    Subject: { Data: subjectMap.get(snsNotification.email_subject) }
                 },
                 Source: sender
             }).promise();
             
             sendEmail.then(data => {
                 console.info("Send Mail Success");
-                
+
+                console.info("Storing DynamoDB Item");
                 dynamodb.putItem({
                     TableName: tableName,
                     Item: {
