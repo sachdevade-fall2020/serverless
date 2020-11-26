@@ -41,7 +41,7 @@ exports.handler = function(event, context) {
                         } 
                     },
                     Subject: { 
-                        Data: snsNotification.email_subject 
+                        Data: snsMessage.email_subject 
                     }
                 },
                 Source: sender
