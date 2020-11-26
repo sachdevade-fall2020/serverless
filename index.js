@@ -31,10 +31,18 @@ exports.handler = function(event, context) {
         if(data.Count == 0){
             console.log("Sending Email Notification");
             const sendEmail = ses.sendEmail({
-                Destination: { ToAddresses: [snsMessage.question_user_email] },
+                Destination: { 
+                    ToAddresses: [snsMessage.question_user_email] 
+                },
                 Message: {
-                    Body: { Html: { Data: snsMessage.email_body } },
-                    Subject: { Data: subjectMap.get(snsNotification.email_subject) }
+                    Body: { 
+                        Html: { 
+                            Data: snsMessage.email_body 
+                        } 
+                    },
+                    Subject: { 
+                        Data: snsNotification.email_subject 
+                    }
                 },
                 Source: sender
             }).promise();
