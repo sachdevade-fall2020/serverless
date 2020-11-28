@@ -16,11 +16,11 @@ exports.handler = function(event, context) {
     
     var getParams = {
         TableName: tableName,
-        FilterExpression: '(question_id = :question_id) AND (subject = :subject) AND (email = :email) AND (answer_text = :answer_text)',
+        FilterExpression: '(subject = :subject) AND (question_id = :question_id) AND (answer_id = :answer_id) AND (answer_text = :answer_text)',
         ExpressionAttributeValues: {
-            ':question_id': {S: snsMessage.question_id},
             ':subject': {S: snsNotification.Subject},
-            ':email': {S: snsMessage.answer_user_email},
+            ':question_id': {S: snsMessage.question_id},
+            ':answer_id': {S: snsMessage.answer_id},
             ':answer_text': {S: snsMessage.answer_text}
         }
     };
@@ -49,16 +49,18 @@ exports.handler = function(event, context) {
             
             sendEmail.then(data => {
                 console.info("Send Mail Success");
+                console.info(`Mail sent to ${snsMessage.question_user_email}`);
 
                 console.info("Storing DynamoDB Item");
                 dynamodb.putItem({
                     TableName: tableName,
                     Item: {
                         id: {S: snsNotification.MessageId},
-                        question_id: {S: snsMessage.question_id},
                         subject: {S: snsNotification.Subject},
-                        email: {S: snsMessage.answer_user_email},
-                        answer_text: {S: snsMessage.answer_text}
+                        question_id: {S: snsMessage.question_id},
+                        answer_id: {S: snsMessage.answer_id},
+                        answer_text: {S: snsMessage.answer_text},
+                        to_email: {S: snsMessage.question_user_email},
                     }
                 }, function(err, data){
                     if(err){
