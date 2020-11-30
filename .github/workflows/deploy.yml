@@ -54,6 +54,6 @@ jobs:
         --application-name ${CODEDEPLOY_APPLICATION} \
         --deployment-config-name CodeDeployDefault.LambdaAllAtOnce \
         --deployment-group-name ${CODEDEPLOY_DEPLOYMENT_GROUP} \
-        --s3-location bucket=${BUCKET_NAME},key=llambda-build-${GITHUB_RUN_NUMBER}.tar.gz,bundleType=tgz \
+        --s3-location bucket=${BUCKET_NAME},key=lambda-build-${GITHUB_RUN_NUMBER}.tar.gz,bundleType=tgz \
         --region ${AWS_REGION} \
         --output json
