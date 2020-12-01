@@ -24,10 +24,7 @@ jobs:
 
       # create zip for deployment
     - name: Build application package
-      run: | 
-        tar \
-        --exclude='*.git*' \
-        -zvcf lambda-build-${GITHUB_RUN_NUMBER}.tar.gz -T bundle.config
+      run: zip lambda-build-${GITHUB_RUN_NUMBER}.zip index.js
     
       #configure aws credentials
     - name: Configure AWS credentials
@@ -41,19 +38,15 @@ jobs:
     - name: Upload package to S3 bucket
       env:
         BUCKET_NAME: ${{ secrets.S3_BUCKET }}
-      run: aws s3 cp lambda-build-${GITHUB_RUN_NUMBER}.tar.gz s3://${BUCKET_NAME}
+      run: aws s3 cp lambda-build-${GITHUB_RUN_NUMBER}.zip s3://${BUCKET_NAME}
 
       # codedeploy api call
     - name: Update lambda
       env:
         BUCKET_NAME: ${{ secrets.S3_BUCKET }}
-        CODEDEPLOY_APPLICATION: ${{ secrets.CODEDEPLOY_APPLICATION }}
-        CODEDEPLOY_DEPLOYMENT_GROUP: ${{ secrets.CODEDEPLOY_DEPLOYMENT_GROUP }}
+        LAMBDA_FUNCTION: ${{ secrets.LAMBDA_FUNCTION }}
       run: |
-        aws deploy create-deployment \
-        --application-name ${CODEDEPLOY_APPLICATION} \
-        --deployment-config-name CodeDeployDefault.LambdaAllAtOnce \
-        --deployment-group-name ${CODEDEPLOY_DEPLOYMENT_GROUP} \
-        --s3-location bucket=${BUCKET_NAME},key=lambda-build-${GITHUB_RUN_NUMBER}.tar.gz,bundleType=tgz \
-        --region ${AWS_REGION} \
-        --output json
+        aws lambda update-function-code \
+        --function-name ${LAMBDA_FUNCTION} \
+        --s3-bucket ${BUCKET_NAME} \
+        --s3-key lambda-build-${GITHUB_RUN_NUMBER}.zip \
